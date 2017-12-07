@@ -280,24 +280,14 @@
 		battery,full_check_current_2nd = <1800 0 1800 1800 1800 1800 1800 1800 0 1800 1800 1800 1800 0 1800 1800 1800 1800 1800 1800 1800 0 0>;
 	};
 
-	backlight: ktd2801-bl {
-		compatible = "kinetic,backlight-ktd2801";
-		backlight-name = "panel";
-		backlight-brt-range = <
-			0	0	/* OFF */
-			5	5	/* DIM */
-			5	5	/* MIN */
-			143	143	/* DEF */
-			255	255	/* MAX */
-		>;
-		bl-ctrl = <&d_gpio_gpio 214 GPIO_ACTIVE_HIGH>;
+	panel_cabc_bl {
+		compatible = "sprd,panel_cabc_bl";
 	};
 
 	panel {
 		compatible = "sprd,sprdfb-dsi-panel";
 		pinctrl-names = "default";
 		gen-panel = <&gen_panel>;
-		gen-panel-backlight = <&backlight>;
 		interrupt-parent = <&d_gpio_gpio>;
 		interrupts = <236 IRQ_TYPE_EDGE_RISING>;
 		gen-panel-esd-en;
