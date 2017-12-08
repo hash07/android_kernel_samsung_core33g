@@ -609,9 +609,12 @@
 		sprd,size-txbuf = <0x0800>; /* 2*1024 */
 	};
 
+	/* Samsung uses the name rment for eth 
+	 * FIXME: This change's location has to be finalized.
+	 */
 	seth0-cpw {
 		compatible = "sprd,seth";
-		sprd,name = "seth_w0";
+		sprd,name = "rmnet0";
 		sprd,dst = <2>;
 		sprd,channel = <7>;
 		sprd,blknum = <128>;
@@ -619,7 +622,7 @@
 
 	seth1-cpw {
 		compatible = "sprd,seth";
-		sprd,name = "seth_w1";
+		sprd,name = "rmnet1";
 		sprd,dst = <2>;
 		sprd,channel = <8>;
 		sprd,blknum = <64>;
@@ -627,7 +630,7 @@
 
 	seth2-cpw {
 		compatible = "sprd,seth";
-		sprd,name = "seth_w2";
+		sprd,name = "rmnet2";
 		sprd,dst = <2>;
 		sprd,channel = <9>;
 		sprd,blknum = <64>;

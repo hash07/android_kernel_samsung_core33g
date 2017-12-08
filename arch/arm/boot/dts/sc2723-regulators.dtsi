@@ -223,7 +223,6 @@
 			regulator-min-microvolt = <1200000>;
 			regulator-max-microvolt = <3760000>;
 			regulator-microvolt-offset = <0>;
-			default-on;
 		};
 
 		vddsim0: vddsim0 {
