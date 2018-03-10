@@ -25,7 +25,7 @@
 #include <linux/fast_charging.h>
 #include <linux/string.h>
 
-int force_fast_charge = 0;
+int force_fast_charge = 1;
 
 static ssize_t force_fast_charge_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
