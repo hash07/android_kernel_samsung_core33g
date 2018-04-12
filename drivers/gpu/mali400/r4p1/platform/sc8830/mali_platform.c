@@ -52,7 +52,7 @@
 /*tshark 28nm*/
 #define DFS_FREQ_NUM			8
 
-#define GPU_MAX_FREQ			460800
+#define GPU_MAX_FREQ			512000
 #define GPU_MIN_FREQ			64000
 
 #define GPU_150M_FREQ_INDEX 	5
@@ -130,32 +130,32 @@ DEFINE_SEMAPHORE(gpu_dfs_sem);
 static struct gpu_clock_source  gpu_clk_src[]=
 {
 	{
+		.name="clk_512m",
+		.freq=512000,
+		.freq_select=6,
+		.clk_src=NULL,
+	},
+	{
 		.name="clk_460m8",
 		.freq=460800,
-		.freq_select=6,
+		.freq_select=5,
 		.clk_src=NULL,
 	},
 	{
 		.name="clk_384m",
 		.freq=384000,
-		.freq_select=5,
+		.freq_select=4,
 		.clk_src=NULL,
 	},
 	{
 		.name="clk_312m",
 		.freq=312000,
-		.freq_select=4,
+		.freq_select=2,
 		.clk_src=NULL,
 	},
 	{
 		.name="clk_256m",
 		.freq=256000,
-		.freq_select=2,
-		.clk_src=NULL,
-	},
-	{
-		.name="clk_208m",
-		.freq=208000,
 		.freq_select=1,
 		.clk_src=NULL,
 	},
