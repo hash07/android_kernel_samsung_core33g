@@ -10,11 +10,11 @@
 set -e -o pipefail
 
 PLATFORM=sc8830
-NAME=RZ_kernel
-VERSION=v1.0
+NAME=RZ_X
+VERSION=v2.0
 
 export ARCH=arm
-export LOCALVERSION=-${VERSION}
+export LOCALVERSION=-${NAME}-${VERSION}
 
 KERNEL_PATH=$(pwd)
 KERNEL_ZIP=${KERNEL_PATH}/kernel_zip
