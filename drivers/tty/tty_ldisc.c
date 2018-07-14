@@ -424,7 +424,7 @@ EXPORT_SYMBOL_GPL(tty_ldisc_flush);
 static void tty_set_termios_ldisc(struct tty_struct *tty, int num)
 {
 	down_write(&tty->termios_rwsem);
-	tty->termios.c_line = num
+	tty->termios.c_line = num;
 	up_write(&tty->termios_rwsem);
 
 	tty->disc_data = NULL;
