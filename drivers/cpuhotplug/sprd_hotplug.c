@@ -35,17 +35,6 @@ static struct sd_dbs_tuners *g_sd_tuners = NULL;
 static unsigned int boot_done;
 static int log_enable = 1;
 
-#ifdef CONFIG_SS_TOUCH_BOOST_CPU_HOTPLUG
-struct semaphore tb_sem;
-static struct task_struct *ksprd_tb;
-bool g_is_suspend=false;
-static unsigned long tp_time;
-#if 0
-static struct workqueue_struct *input_wq;
-static DEFINE_PER_CPU(struct work_struct, dbs_refresh_work);
-#endif
-#endif
-
 static struct delayed_work plugin_work;
 static struct delayed_work unplug_work;
 static struct work_struct plugin_request_work;
@@ -55,13 +44,8 @@ u64 g_prev_cpu_wall[4] = {0};
 u64 g_prev_cpu_idle[4] = {0};
 
 /* On-demand governor macros */
-#define DEF_FREQUENCY_DOWN_DIFFERENTIAL		(10)
-#define DEF_FREQUENCY_UP_THRESHOLD		(80)
 #define DEF_SAMPLING_DOWN_FACTOR		(1)
 #define MAX_SAMPLING_DOWN_FACTOR		(100000)
-#define MICRO_FREQUENCY_DOWN_DIFFERENTIAL	(3)
-#define MICRO_FREQUENCY_UP_THRESHOLD		(95)
-#define MICRO_FREQUENCY_MIN_SAMPLE_RATE		(10000)
 #define MIN_FREQUENCY_UP_THRESHOLD		(11)
 #define MAX_FREQUENCY_UP_THRESHOLD		(100)
 
@@ -1481,107 +1465,6 @@ static struct kobj_type hotplug_dir_ktype = {
 	.default_attrs	= g,
 };
 
-
-#ifdef CONFIG_SS_TOUCH_BOOST_CPU_HOTPLUG
-static void dbs_input_event(struct input_handle *handle, unsigned int type,
-		unsigned int code, int value)
-{
-
-	if (time_before(jiffies, boot_done))
-		return;
-
-	if (time_after(jiffies, tp_time))
-		tp_time = jiffies + HZ / 2;
-	else
-		return;
-
-	up(&tb_sem);
-}
-
-static bool dbs_match(struct input_handler *handler, struct input_dev *dev)
-{
-         /*touchpads and touchscreens */
-         if (test_bit(EV_KEY, dev->evbit) &&
-                   test_bit(EV_ABS, dev->evbit) &&
-                   //test_bit(BTN_TOUCH, dev->keybit) &&
-                   test_bit(ABS_MT_TOUCH_MAJOR, dev->absbit) &&
-                   test_bit(ABS_MT_POSITION_X, dev->absbit) &&
-                   test_bit(ABS_MT_POSITION_Y, dev->absbit) &&
-                   test_bit(ABS_MT_WIDTH_MAJOR, dev->absbit)
-         ){
-                   return true;
-         }
-
-         return false;
-}
-
-
-static int dbs_input_connect(struct input_handler *handler,
-		struct input_dev *dev, const struct input_device_id *id)
-{
-	struct input_handle *handle;
-	int error;
-
-	handle = kzalloc(sizeof(struct input_handle), GFP_KERNEL);
-	if (!handle)
-		return -ENOMEM;
-
-	handle->dev = dev;
-	handle->handler = handler;
-	handle->name = "cpufreq";
-
-	error = input_register_handle(handle);
-	if (error)
-		goto err2;
-
-	error = input_open_device(handle);
-	if (error)
-		goto err1;
-
-	pr_info("[DVFS] dbs_input_connect register success\n");
-	return 0;
-err1:
-	pr_info("[DVFS] dbs_input_connect register fail err1\n");
-	input_unregister_handle(handle);
-err2:
-	pr_info("[DVFS] dbs_input_connect register fail err2\n");
-	kfree(handle);
-	return error;
-}
-
-static void dbs_input_disconnect(struct input_handle *handle)
-{
-	input_close_device(handle);
-	input_unregister_handle(handle);
-	kfree(handle);
-}
-
-static const struct input_device_id dbs_ids[] = {
-	{ .driver_info = 1 },
-	{ },
-};
-
-struct input_handler dbs_input_handler = {
-	.event		= dbs_input_event,
-	.match		= dbs_match,
-	.connect	= dbs_input_connect,
-	.disconnect	= dbs_input_disconnect,
-	.name		= "cpufreq_ond",
-	.id_table	= dbs_ids,
-};
-
-static int sprd_tb_thread()
-{
-	while (1) {
-                down(&tb_sem);
-		if (num_online_cpus() < 3 && g_is_suspend == false)
-			schedule_delayed_work_on(0, &plugin_work, 0);
-
-	}
-	return 0;
-}
-#endif
-
 int cpu_core_thermal_limit(int cluster, int max_core)
 {
 
@@ -1607,34 +1490,6 @@ static void __init sprd_hotplug_init(void)
 	
 	sd_tuners_init(g_sd_tuners);
 
-
-#ifdef CONFIG_SS_TOUCH_BOOST_CPU_HOTPLUG
-#if 0
-	input_wq = alloc_workqueue("iewq", WQ_MEM_RECLAIM|WQ_SYSFS, 1);
-
-	if (!input_wq)
-	{
-		printk(KERN_ERR "Failed to create iewq workqueue\n");
-		return -EFAULT;
-	}
-
-	for_each_possible_cpu(i)
-	{
-		INIT_WORK(&per_cpu(dbs_refresh_work, i), dbs_refresh_callback);
-	}
-#endif
-	tp_time = jiffies;
-
-	if (input_register_handler(&dbs_input_handler))
-		pr_err("[DVFS] input_register_handler failed\n");
-
-	sema_init(&tb_sem, 0);
-
-	ksprd_tb = kthread_create(sprd_tb_thread, NULL, "sprd_tb_thread");
-
-	wake_up_process(ksprd_tb);
-
-#endif
 	ksprd_hotplug = kthread_create(sprd_hotplug, NULL, "sprd_hotplug");
 
 	wake_up_process(ksprd_hotplug);
