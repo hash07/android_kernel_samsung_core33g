@@ -12,13 +12,14 @@ set -e -o pipefail
 PLATFORM=sc8830
 NAME=RZ_X
 VERSION=v2.0
+DATE=`date +%d-%m-%Y`
 
 export ARCH=arm
 export LOCALVERSION=-${NAME}-${VERSION}
 
 KERNEL_PATH=$(pwd)
 KERNEL_ZIP=${KERNEL_PATH}/kernel_zip
-KERNEL_ZIP_NAME=${NAME}_${VERSION}.zip
+KERNEL_ZIP_NAME=${NAME}_${VERSION}-${DATE}.zip
 KERNEL_IMAGE=${KERNEL_ZIP}/tools/Image
 DT_IMG=${KERNEL_ZIP}/tools/dt.img
 EXTERNAL_MODULE_PATH=${KERNEL_PATH}/external_module
@@ -78,6 +79,7 @@ function clean() {
 	echo -e "Cleaning build environment...$nocol";
 	make -j${JOBS} mrproper;
 
+	rm_if_exist *.zip;
 	rm_if_exist ${KERNEL_ZIP_NAME};
 	rm_if_exist ${DT_IMG};
 
